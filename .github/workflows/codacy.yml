@@ -43,7 +43,6 @@ jobs:
     
     - name: Show outdated dependencies
       run: cat outdated_dependencies.txt
-  
 
     - name: Upload coverage to Codacy
       run: |
