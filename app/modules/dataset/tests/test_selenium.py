@@ -1,4 +1,6 @@
 import time
+import tempfile
+import os
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -80,13 +82,18 @@ def test_upload_dataset():
         affiliation_field1 = driver.find_element(By.NAME, "authors-1-affiliation")
         affiliation_field1.send_keys("Club1")
 
-        # Upload two files
+        # Crear un archivo temporal UVL en lugar de /tmp/FileSystem.uvl
+        tmp_file = tempfile.NamedTemporaryFile(suffix=".uvl", delete=False)
+        tmp_file.write(b"dummy uvl content")
+        tmp_file.close()
+
+        # Upload two files (using the temporary file)
         dropzone = driver.find_element(By.CLASS_NAME, "dz-hidden-input")
-        dropzone.send_keys("/tmp/FileSystem.uvl")
+        dropzone.send_keys(tmp_file.name)
         wait_for_page_to_load(driver)
 
         dropzone = driver.find_element(By.CLASS_NAME, "dz-hidden-input")
-        dropzone.send_keys("/tmp/FileSystem.uvl")
+        dropzone.send_keys(tmp_file.name)
         wait_for_page_to_load(driver)
 
         # Add authors in UVL models
@@ -120,6 +127,10 @@ def test_upload_dataset():
         print("Test passed!")
 
     finally:
+        try:
+            os.unlink(tmp_file.name)
+        except Exception:
+            pass
 
         # Close the browser
         close_driver(driver)
